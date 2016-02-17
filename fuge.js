@@ -15,14 +15,17 @@
 
 'use strict';
 
+var minimist = require('minimist');
 var program = require('commist')();
-var runner = require('./runner')();
+var toolbag = require('toolbag');
+var runner = require('./runner');
 var gen = require('./generator');
 var shell = require('./shell')();
 var util = require('./util')();
-var minimist = require('minimist');
 
 
+
+module.exports = start;
 
 function argify(args) {
   return minimist(args, {
@@ -143,14 +146,7 @@ program.register('--help', showHelp);
 
 function start(argv) {
   var remaining = program.parse(argv);
-  if (remaining) { console.log('No matching command.'); }
+  if (remaining) {
+    console.log('No matching command found.  Run with --help for full list of commands.');
+  }
 }
-
-
-
-module.exports = start;
-if (require.main === module) {
-  start(process.argv.slice(2));
-}
-
-

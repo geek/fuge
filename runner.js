@@ -15,51 +15,38 @@
 'use strict';
 
 var _ = require('lodash');
-var runner;
+var Runner = require('fuge-runner');
 
 
-module.exports = function() {
-
-  var previewSystem = function(system, config) {
-    runner = require('fuge-runner')(config);
-    runner.previewAll(system, function(err, result) {
-      if (err) { return console.log(err); }
-      _.each(result, function(command) {
-        var env = '';
-        console.log('executing: ' + command.detail.cmd);
-        console.log('  in directory: ' + command.detail.cwd);
-        _.each(_.keys(command.detail.environment), function(key) {
-          env += '    ' + key + '=' + command.detail.environment[key] + '\n';
-        });
-        console.log('  with environment:\n' + env);
+exports.previewSystem = function(system, config) {
+  var runner = Runner(config);
+  runner.previewAll(system, function(err, result) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    _.each(result, function(command) {
+      var env = '';
+      console.log('executing: ' + command.detail.cmd);
+      console.log('  in directory: ' + command.detail.cwd);
+      _.each(_.keys(command.detail.environment), function(key) {
+        env += '    ' + key + '=' + command.detail.environment[key] + '\n';
       });
+      console.log('  with environment:\n' + env);
     });
-  };
-
-
-
-  var buildSystem = function(system, config, cb) {
-    runner = require('fuge-runner')(config);
-    runner.buildAll(system, function(err) {
-      cb(err);
-    });
-  };
-
-
-
-  var pullSystem = function(system, config, cb) {
-    runner = require('fuge-runner')(config);
-    runner.pullAll(system, function(err) {
-      cb(err);
-    });
-  };
-
-
-
-  return {
-    previewSystem: previewSystem,
-    buildSystem: buildSystem,
-    pullSystem: pullSystem
-  };
+  });
 };
 
+
+
+exports.buildSystem = function(system, config, cb) {
+  var runner = Runner(config);
+  runner.buildAll(system, cb);
+};
+
+
+
+exports.pullSystem = function(system, config, cb) {
+  var runner = Runner(config);
+  runner.pullAll(system, cb);
+};

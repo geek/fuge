@@ -70,6 +70,9 @@ module.exports = function() {
     console.log('  grep - searches all logs');
     console.log('  grep [processname] - searches specific logs');
     console.log('  send [process] [message] - sends a message to a specific process');
+    console.log('  heap [process] - create a heapsnapshot for a child node process');
+    console.log('  report [process] - listen for report messages and log to stdout');
+    console.log('  unreport [process] - stop listening for report messages');
     console.log('  exit - termiate all managed process and exit');
     cb();
   };
@@ -91,17 +94,17 @@ module.exports = function() {
           var procKey = _.find(_.keys(procs), function(key) { return procs[key].identifier === container.name; });
           if (procKey) {
             var proc = procs[procKey];
-            table.push([container.name.green, 
-                        container.type.green, 
-                        'running'.green, 
+            table.push([container.name.green,
+                        container.type.green,
+                        'running'.green,
                         proc.monitor ? 'yes'.green : 'no'.red,
                         proc.tail ? 'yes'.green : 'no'.red,
                         counts[container.name] ? ('' + counts[container.name]).green : '0'.red]);
           }
           else {
-            table.push([container.name.red, 
-                        container.type.red, 
-                        'stopped'.red, 
+            table.push([container.name.red,
+                        container.type.red,
+                        'stopped'.red,
                         container.monitor ? 'yes'.green : 'no'.red,
                         container.tail ? 'yes'.green : 'no'.red,
                         '0'.red]);
@@ -148,7 +151,7 @@ module.exports = function() {
 
 
 
-  var stopProcess = function(args, system, cb) { 
+  var stopProcess = function(args, system, cb) {
     if (args.length === 1 || args[1] === 'all') {
       _runner.stopAll(system, function(err) {
         cb(err);
@@ -163,7 +166,7 @@ module.exports = function() {
 
 
 
-  var startProcess = function(args, system, cb) { 
+  var startProcess = function(args, system, cb) {
     if (args.length === 1 || args[1] === 'all') {
       _runner.startAll(system, args[2] || 1, function(err) {
         cb(err);
@@ -178,7 +181,7 @@ module.exports = function() {
 
 
 
-  var debugProcess = function(args, system, cb) { 
+  var debugProcess = function(args, system, cb) {
     if (args.length === 2) {
       if (!_runner.isProcessRunning(args[1])) {
         _runner.debug(system, args[1], function(err) {
@@ -197,7 +200,7 @@ module.exports = function() {
 
 
 
-  var watchProcess = function(args, system, cb) { 
+  var watchProcess = function(args, system, cb) {
     var err = null;
     if (args.length === 1 || args[1] === 'all') {
       _runner.watchAll(system);
@@ -257,26 +260,41 @@ module.exports = function() {
       _runner.grep(args[2], _config, args[1], cb);
     }
   };
-    
-    
+
+
 
   var sendMessage = function(args, system, cb) {
-    console.log('not implemented');
-    cb();
+    var err = _runner.sendMessage(system, args[1], args[2]);
+    cb(err);
   };
 
-
+  var heapProcess = function(args, system, cb) {
+    var err = _runner.heap(system, args[1]);
+    cb(err);
+  };
 
   var shutdown = function(args, system, cb) {
     stopSystem(system, cb);
   };
 
+  var reportProcess = function(args, system, cb) {
+    console.log('Listening for messages');
+    _runner.startReport(system, args[1]);
+
+    cb();
+  };
+
+  var unreportProcess = function(args, system, cb) {
+    _runner.stopReport(system, args[1]);
+
+    cb();
+  };
 
 
   var commands = {'': noop,
                   help: showHelp,
-                  ps: psList, 
-                  proxy: proxy, 
+                  ps: psList,
+                  proxy: proxy,
                   info: showInfo,
                   stop: stopProcess,
                   start: startProcess,
@@ -288,7 +306,10 @@ module.exports = function() {
                   grep: grepLogs,
                   send: sendMessage,
                   exit: shutdown,
-                  quit: shutdown};
+                  quit: shutdown,
+                  heap: heapProcess,
+                  report: reportProcess,
+                  unreport: unreportProcess};
 
 
 
@@ -367,5 +388,3 @@ module.exports = function() {
     runSingleCommand: runSingleCommand
   };
 };
-
-

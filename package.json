@@ -39,6 +39,7 @@
     "minimist": "^1.2.0",
     "ordinal": "0.0.2",
     "positive": "^1.0.9",
+    "toolbag": "^0.9.0",
     "xenotype": "^0.4.0",
     "yamljs": "^0.2.4",
     "yeoman-environment": "^1.2.7"
@@ -48,7 +49,7 @@
     "url": "https://github.com/apparatus/fuge.git"
   },
   "bin": {
-    "fuge": "./fuge.js"
+    "fuge": "./bin/fuge.js"
   },
   "scripts": {
     "lint": "jshint *.js && jshint **/*.js",

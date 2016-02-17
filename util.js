@@ -31,7 +31,7 @@ module.exports = function() {
           console.log('overriding run command for: ' + container.name + ' to: ' + config.overrides[container.name].run);
           container.specific.execute.exec = config.overrides[container.name].run;
         }
-      
+
         if (config.overrides[container.name].build) {
           console.log('overriding build command for: ' + container.name + ' to: ' + config.overrides[container.name].build);
           container.specific.buildScript = config.overrides[container.name].build;
@@ -49,6 +49,10 @@ module.exports = function() {
 
       if (config && config.monitor) {
         container.monitor = true;
+      }
+
+      if (!config || !config.toolbag) {
+        _.merge(container.specific.environment, { TOOLBAG_PATH: path.join(__dirname, 'toolbag_config.js') });
       }
     });
   };
@@ -113,7 +117,7 @@ module.exports = function() {
     });
     var info = !choices.length ? (('(' + def + ')') || '') : '(' + choices.join(', ') + ')';
 
-    return '\u001b[32m?\u001b[39m \u001b[1m' + str + 
+    return '\u001b[32m?\u001b[39m \u001b[1m' + str +
       '\u001b[22m \u001b[2m' + info + '\u001b[22m: ';
   };
 
@@ -125,4 +129,3 @@ module.exports = function() {
     inq: inq
   };
 };
-
